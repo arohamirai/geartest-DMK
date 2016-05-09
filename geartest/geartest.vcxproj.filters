@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="geartest.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="geartestDLG.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="listener.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessThread.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyEdit.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="geartest.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="geartestDLG.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="listener.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessThread.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="cameraParmFile.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+    <ClInclude Include="MyEdit.h">
+      <Filter>header fiiles</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="geartest.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\geartest.ico" />
+    <None Include="res\geartest.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="source files">
+      <UniqueIdentifier>{f56f4d55-1cfe-41ce-837d-5a91a0d7610c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header fiiles">
+      <UniqueIdentifier>{44faaa78-bd8d-461b-b835-e65b911c5459}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
