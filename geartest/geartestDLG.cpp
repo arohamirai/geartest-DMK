@@ -214,10 +214,10 @@ void CgeartestDlg::OnBnClickedButtonimagesettings()
 		bool flag = pProcessThread->m_cGrabber.isDevValid();
 		if (flag)
 		{
-			pProcessThread->OnLive(false);
+			//pProcessThread->OnLive(false);
 			pProcessThread->m_cGrabber.showVCDPropertyPage();
 			pProcessThread->m_cGrabber.saveDeviceStateToFile(PREDEF_CAMERAPARAMFILE[i]);
-			pProcessThread->OnLive(true);
+			//pProcessThread->OnLive(true);
 		}	
 	}
 }

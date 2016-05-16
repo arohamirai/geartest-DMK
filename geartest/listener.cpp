@@ -21,8 +21,8 @@ CListenerSingle::CListenerSingle()
 	cb = 0;
 	rs = 0;
 	cs = 0;
-	m_min = 3;
-	m_max = 10;
+	m_min = 6;
+	m_max = 8;
 
 	/*try
 	{
