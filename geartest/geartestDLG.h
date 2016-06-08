@@ -64,4 +64,36 @@ public:
 	afx_msg void OnBnClickedRadio3();
 	afx_msg void OnBnClickedRadio4();
 	afx_msg void OnBnClickedRadio1();
+
+private:
+	CMyEdit m_sttTotalBig;
+	CMyEdit m_sttUnqualBig;
+	CMyEdit m_sttUnqualRateBig;
+
+	CMyEdit m_sttTotalSmall;
+	CMyEdit m_sttUnqualSmall;
+	CMyEdit m_sttUnqualRateSmall;
+
+	CMyEdit m_edtTotalBig;
+	CMyEdit m_edtUnqualBig;
+	CMyEdit m_edtUnqualRateBig;
+
+	CMyEdit m_edtTotalSmall;
+	CMyEdit m_edtUnqualSmall;
+	CMyEdit m_edtUnqualRateSmall;
+
+private:
+	int m_TotalBig;
+	int m_UnqualBig;
+	float m_UnqualRateBig;
+
+	int m_TotalSmall;
+	int m_UnqualSmall;
+	float m_UnqualRateSmall;
+
+public:
+	int m_cameraNumber;
+
+protected:
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

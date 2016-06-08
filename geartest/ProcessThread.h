@@ -30,6 +30,7 @@ public:
 	int OnLive(bool IsLive);
 	bool InitShapeModel(int gearType);
 	int m_cameraIndex;
+	BOOL m_IsBig;
 
 protected:
 	DECLARE_MESSAGE_MAP()

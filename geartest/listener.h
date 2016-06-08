@@ -84,6 +84,7 @@ private:
 public:
 	void xld2vector(cv::Mat &mat, HObject &xld, cv::Scalar color);
 	void action(void);
+
 };
 
 //////////////////////////////////////////
@@ -125,9 +126,11 @@ private:
 	int m_max;
 	unsigned char *m_inBuf;
 	cv::Mat colorimg;
+	BOOL m_IsBig;
 
 public:
 	void xld2vector(cv::Mat &mat, HObject &xld, cv::Scalar color);
 	void action(void);
+
 };
 #endif // !defined(AFX_LISTENER_H__3E017E1D_6B0A_472C_9F9C_0C5F9A8DFB23__INCLUDED_)

@@ -24,6 +24,19 @@
 #define IDC_BUTTON2                     1025
 #define IDC_BUTTON3                     1026
 #define IDC_BUTTON4                     1027
+#define IDC_EDIT_TOTAL_BIG              1028
+#define IDC_EDIT_UNQUALIFIED_BIG        1029
+#define IDC_EDIT_UNQUALIFIED_RATE_BIG   1030
+#define IDC_EDIT_TOTAL_SMALL            1031
+#define IDC_EDIT_UNQUALIFIED_SMALL      1032
+#define IDC_EDIT_UNQUALIFIED_RATE_SMALL 1033
+#define IDC_EDIT_TOTAL_BIG_TEXT         1046
+#define IDC_EDIT_UNQUALIFIED_BIG_TEXT   1047
+#define IDC_EDIT_UNQUALIFIED_RATE_BIG_TEXT 1048
+#define IDC_EDIT_TOTAL_SMALL_TEXT       1049
+#define IDC_EDIT_UNQUALIFIED_SMALL_TEXT 1050
+#define IDC_EDIT__UNQUALIFIED_RATE_SMALL_TEXT 1051
+#define IDC_EDIT_UNQUALIFIED_RATE_SMALL_TEXT 1051
 
 // Next default values for new objects
 // 
@@ -31,7 +44,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1052
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

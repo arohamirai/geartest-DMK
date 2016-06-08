@@ -12,6 +12,14 @@
 #endif
 using namespace DShowLib;
 
+// 大齿轮计数，单个相机时只使用下面三个变量
+int totalNumBig = 0;
+int unqualNumBig = 0;
+
+// 小齿轮计数，双相机时使用
+int totalNumSmall = 0;
+int unqualNumSmall = 0;
+
 
 // CAboutDlg dialog used for App About
 
@@ -52,6 +60,13 @@ CgeartestDlg::CgeartestDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CgeartestDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_TotalBig = 0;
+	m_TotalSmall = 0;
+	m_UnqualBig = 0;
+	m_UnqualSmall = 0;
+	
+	m_UnqualRateBig = 0.0;
+	m_UnqualRateSmall = 0.0;
 }
 
 
@@ -70,6 +85,27 @@ void CgeartestDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RADIO2, m_btnRadio2);
 	DDX_Control(pDX, IDC_RADIO3, m_btnRadio3);
 	DDX_Control(pDX, IDC_RADIO4, m_btnRadio4);
+
+	DDX_Control(pDX, IDC_EDIT_TOTAL_BIG_TEXT, m_sttTotalBig);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_BIG_TEXT, m_sttUnqualBig);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_RATE_BIG_TEXT, m_sttUnqualRateBig);
+	DDX_Control(pDX, IDC_EDIT_TOTAL_SMALL_TEXT, m_sttTotalSmall);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_SMALL_TEXT, m_sttUnqualSmall);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_RATE_SMALL_TEXT, m_sttUnqualRateSmall);
+
+	DDX_Control(pDX, IDC_EDIT_TOTAL_BIG, m_edtTotalBig);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_BIG, m_edtUnqualBig);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_RATE_BIG,m_edtUnqualRateBig);
+	DDX_Control(pDX, IDC_EDIT_TOTAL_SMALL, m_edtTotalSmall);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_SMALL, m_edtUnqualSmall);
+	DDX_Control(pDX, IDC_EDIT_UNQUALIFIED_RATE_SMALL,m_edtUnqualRateSmall);
+
+	DDX_Text(pDX, IDC_EDIT_TOTAL_BIG, m_TotalBig);
+	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_BIG, m_UnqualBig);
+	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_RATE_BIG,m_UnqualRateBig);
+	DDX_Text(pDX, IDC_EDIT_TOTAL_SMALL, m_TotalSmall);
+	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_SMALL, m_UnqualSmall);
+	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_RATE_SMALL,m_UnqualRateSmall);
 }
 
 // CgeartestDlg message handlers
@@ -80,8 +116,6 @@ BEGIN_MESSAGE_MAP(CgeartestDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 
-
-	
 	ON_BN_CLICKED(IDC_BUTTONIMAGESETTINGS, OnBnClickedButtonimagesettings)
 	ON_BN_CLICKED(IDC_BUTTONLIVEVIDEO, OnBnClickedButtonlivevideo)
 	ON_WM_CLOSE()
@@ -89,6 +123,7 @@ BEGIN_MESSAGE_MAP(CgeartestDlg, CDialog)
 	ON_BN_CLICKED(IDC_RADIO3, &CgeartestDlg::OnBnClickedRadio3)
 	ON_BN_CLICKED(IDC_RADIO4, &CgeartestDlg::OnBnClickedRadio4)
 	ON_BN_CLICKED(IDC_RADIO1, &CgeartestDlg::OnBnClickedRadio1)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -120,12 +155,14 @@ BOOL CgeartestDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
+	InitEditControl();
 	// Resize the video window to 640*480 pixels.
 	m_cStaticVideoWindowBig.SetWindowPos(NULL,0,0,640,480,SWP_NOMOVE|SWP_NOZORDER);
 	m_cStaticVideoWindowSmall.SetWindowPos(NULL,0,0,640,480,SWP_NOMOVE|SWP_NOZORDER);
 
 	myCameraInit();
 	OnBnClickedRadio1();
+	OnBnClickedButtonlivevideo();
 	return TRUE;  // return TRUE unless you set the focus to a control.
 }
 
@@ -189,8 +226,7 @@ HCURSOR CgeartestDlg::OnQueryDragIcon()
 
 void CgeartestDlg::OnBnClickedButtondevice()
 {
-	int cameraNumber = 2;
-	for (int i = 0; i < cameraNumber; ++i)
+	for (int i = 0; i < m_cameraNumber; ++i)
 	{
 		// If live video is running, stop it.
 		pProcessThread = pProcessThreadArray[i];
@@ -207,8 +243,7 @@ void CgeartestDlg::OnBnClickedButtondevice()
 
 void CgeartestDlg::OnBnClickedButtonimagesettings()
 {
-	int cameraNumber = 2;
-	for(int i = 0; i < cameraNumber; ++i)
+	for(int i = 0; i < m_cameraNumber; ++i)
 	{
 		pProcessThread = pProcessThreadArray[i];
 		bool flag = pProcessThread->m_cGrabber.isDevValid();
@@ -229,8 +264,7 @@ void CgeartestDlg::OnBnClickedButtonimagesettings()
 
 void CgeartestDlg::OnBnClickedButtonlivevideo()
 {
-	int cameraNumber = 2;
-	for(int i = 0; i < cameraNumber; ++i)
+	for(int i = 0; i < m_cameraNumber; ++i)
 	{
 		pProcessThread = pProcessThreadArray[i];
 		bool flag = pProcessThread->m_cGrabber.isDevValid();
@@ -240,12 +274,14 @@ void CgeartestDlg::OnBnClickedButtonlivevideo()
 			if (flag1)
 			{
 				pProcessThread->OnLive(false);
-				m_cButtonLive.SetWindowText(_T("Live Start"));
+				KillTimer(1);
+				m_cButtonLive.SetWindowText(_T("开始检测"));
 			}
 			else
 			{
 				pProcessThread->OnLive(true);
-				m_cButtonLive.SetWindowText(_T("Live Stop"));
+				SetTimer(1,0.5*1000,NULL);
+				m_cButtonLive.SetWindowText(_T("停止检测"));
 			}
 
 		}
@@ -257,8 +293,7 @@ void CgeartestDlg::OnBnClickedButtonlivevideo()
 
 void CgeartestDlg::OnClose()
 {
-	int cameraNumber = 2;
-	for(int i = 0; i < cameraNumber; ++i)
+	for(int i = 0; i < m_cameraNumber; ++i)
 	{
 		pProcessThread = pProcessThreadArray[i];
 		pProcessThread->OnLive(false);
@@ -279,8 +314,9 @@ int CgeartestDlg::myCameraInit(void)
 		return 0;
 	}
 
-	int cameraNumber = 2;
-	for (int i = 0;i < cameraNumber; ++i)
+	m_cameraNumber = 2;// pVidCapDevList->size();
+
+	for (int i = 0;i < m_cameraNumber; ++i)
 	{
 		pProcessThreadArray[i] = new CProcessThread();
 		pProcessThread= pProcessThreadArray[i];
@@ -288,14 +324,17 @@ int CgeartestDlg::myCameraInit(void)
 		pProcessThread->SetThreadPriority(THREAD_PRIORITY_NORMAL);
 		// 线程编号标识，偶数编号的线程用于处理大齿轮，奇数编号用于处理小齿轮
 		pProcessThread->m_cameraIndex = i;
+		pProcessThread->pParentWnd = this;
 		if (i%2)
 		{
 			// Small
+			pProcessThread->m_IsBig = FALSE;
 			pProcessThread->pShowStatic = &m_cStaticVideoWindowSmall;
 		}
 		else
 		{
 			//big
+			pProcessThread->m_IsBig = TRUE;
 			pProcessThread->pShowStatic = &m_cStaticVideoWindowBig;
 		}
 
@@ -390,8 +429,7 @@ void CgeartestDlg::OnBnClickedRadio4()
 bool CgeartestDlg::InitShapeModel(int gearType)
 {
 	bool sucess = true;
-	int cameraNumber = 2;
-	for (int i = 0; i < cameraNumber; ++i)
+	for (int i = 0; i < m_cameraNumber; ++i)
 	{
 		pProcessThread = pProcessThreadArray[i];
 		pProcessThread->OnLive(false);
@@ -406,8 +444,90 @@ bool CgeartestDlg::InitShapeModel(int gearType)
 
 int CgeartestDlg::InitEditControl(void)
 {
-	int FontHeight = 200;
-	//m_btnRadio1.SetTextFont(FontHeight,_T("黑体"));
+	// STATIC 空间初始化
+	int sttFontHeight = 200;
+	m_sttTotalBig.SetBkColor(RGB(255,255,200));
+	m_sttTotalBig.SetForeColor(RGB(0,0,255));
+	m_sttTotalBig.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttTotalBig.SetWindowText(_T("总计"));
+
+	m_sttUnqualBig.SetBkColor(RGB(255,255,200));
+	m_sttUnqualBig.SetForeColor(RGB(0,0,255));
+	m_sttUnqualBig.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttUnqualBig.SetWindowText(_T("次品"));
+
+	m_sttUnqualRateBig.SetBkColor(RGB(255,255,200));
+	m_sttUnqualRateBig.SetForeColor(RGB(0,0,255));
+	m_sttUnqualRateBig.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttUnqualRateBig.SetWindowText(_T("次品率"));
+
+	m_sttTotalSmall.SetBkColor(RGB(255,255,200));
+	m_sttTotalSmall.SetForeColor(RGB(0,0,255));
+	m_sttTotalSmall.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttTotalSmall.SetWindowText(_T("总计"));
+
+	m_sttUnqualSmall.SetBkColor(RGB(255,255,200));
+	m_sttUnqualSmall.SetForeColor(RGB(0,0,255));
+	m_sttUnqualSmall.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttUnqualSmall.SetWindowText(_T("次品"));
+
+	m_sttUnqualRateSmall.SetBkColor(RGB(255,255,200));
+	m_sttUnqualRateSmall.SetForeColor(RGB(0,0,255));
+	m_sttUnqualRateSmall.SetTextFont(sttFontHeight,_T("宋体"));
+	m_sttUnqualRateSmall.SetWindowText(_T("次品率"));
+
+
+
+	// EDIT 控件初始化
+	int editFontHeight = 200;
+	m_edtTotalBig.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtTotalBig.SetForeColor(RGB(0,0,255));
+	m_edtTotalBig.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+	m_edtUnqualBig.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtUnqualBig.SetForeColor(RGB(0,0,255));
+	m_edtUnqualBig.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+	m_edtUnqualRateBig.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtUnqualRateBig.SetForeColor(RGB(0,0,255));
+	m_edtUnqualRateBig.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+	m_edtTotalSmall.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtTotalSmall.SetForeColor(RGB(0,0,255));
+	m_edtTotalSmall.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+	m_edtUnqualSmall.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtUnqualSmall.SetForeColor(RGB(0,0,255));
+	m_edtUnqualSmall.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+	m_edtUnqualRateSmall.SetTextFont(editFontHeight,_T("宋体"));
+	m_edtUnqualRateSmall.SetForeColor(RGB(0,0,255));
+	m_edtUnqualRateSmall.SetBkColor(RGB(255,255,200));
+	//m_edtTotalBig.SetWindowText(_T("001"));
+
+
+	// RADIO 控件初始化
 	return 0;
 }
 
+
+void CgeartestDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+
+	m_TotalBig = totalNumBig;
+	m_UnqualBig = unqualNumBig;
+	m_UnqualRateBig = (float)unqualNumBig/totalNumBig;
+
+	m_TotalSmall = totalNumSmall;
+	m_UnqualSmall = unqualNumSmall;
+	m_UnqualRateSmall = (float)unqualNumSmall/totalNumSmall;
+
+	UpdateData(FALSE);
+	CDialog::OnTimer(nIDEvent);
+}

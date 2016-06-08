@@ -25,6 +25,24 @@ enum GEAR_TYPE
 	// 其他种类请按上面格式添加
 };
 
+////// 用于发送消息的结构
+//struct _MyMsgSingle 
+//{
+//	int totalNum;
+//	int unqualNum;
+//	float unquanlRate;
+//} MyMsgSingle;
+//
+//struct _MyMsgMulti 
+//{
+//	int totalNumBig;
+//	int unqualNumBig;
+//	float unquanlRateBig;
+//	int totalNumSmall;
+//	int unqualNumSmall;
+//	float unquanlRateSmall;
+//} MyMsgMulti;
+
 
 class CgeartestApp : public CWinApp
 {

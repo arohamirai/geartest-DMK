@@ -6,6 +6,15 @@
 #include "stdafx.h"
 #include "Listener.h"
 #include "geartest.h"
+
+
+
+extern int totalNumBig; 
+extern int unqualNumBig;
+extern int totalNumSmall;
+extern int unqualNumSmall;
+
+
 //CvFont font;
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -23,25 +32,6 @@ CListenerSingle::CListenerSingle()
 	cs = 0;
 	m_min = 6;
 	m_max = 8;
-
-	/*try
-	{
-		m_modelBig.ReadShapeModel(_T("ModelID.shm"));
-		m_modelSmall.ReadShapeModel(_T("ModelID1.shm"));
-	}
-	catch(HException &except)
-	{
-		if (except.ErrorCode() == H_ERR_FNF)
-		{
-			MessageBox(NULL,_T("未发现模板文件，请检查并重试!"),NULL,NULL);
-			return;
-
-		}
-	}
-	GetShapeModelContours(&m_modelContoursBig, m_modelBig, 1);
-	GetShapeModelContours(&m_modelContoursSmall, m_modelSmall, 1);
-	CreateDistanceTransformXld(m_modelContoursBig, "point_to_segment", m_max, &m_distanceTransformBig);
-	CreateDistanceTransformXld(m_modelContoursSmall, "point_to_segment", m_max, &m_distanceTransformSmall);*/
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -85,6 +75,7 @@ void CListenerSingle::SetViewCWnd(CWnd *pView)
 
 void CListenerSingle::frameReady( Grabber& param, smart_ptr<MemBuffer> pBuffer, DWORD FrameNumber)
 {
+	++totalNumBig;
 	pBuffer->lock();
 	DoImageProcessing( pBuffer );
 	DrawBuffer(pBuffer);
@@ -269,6 +260,7 @@ void CListenerSingle::action()
 		rb = hv_ModelRow[0].D();
 		cb = hv_ModelColumn[0].D();
 
+		// 显示匹配结果
 		HomMat2dIdentity(&hv_HomMat);
 		HomMat2dScale(hv_HomMat, HTuple(hv_ModelScale[0]), HTuple(hv_ModelScale[0]), 
 			0, 0, &hv_HomMat);
@@ -276,7 +268,6 @@ void CListenerSingle::action()
 		HomMat2dTranslate(hv_HomMat, HTuple(hv_ModelRow[0]), HTuple(hv_ModelColumn[0]), 
 			&hv_HomMat);
 
-		// 显示匹配结果
 		AffineTransContourXld(m_modelContoursBig, &ho_TransContours, hv_HomMat);
 		xld2vector(colorimg,ho_TransContours,CV_RGB(0,255,0));
 
@@ -347,6 +338,11 @@ void CListenerSingle::action()
 		{
 			putText(colorimg,"Small is OK",cvPoint(10,100),FONT_HERSHEY_SIMPLEX, 1.0,CV_RGB(0,255,0));
 		}
+	
+		if (hv_SmallNum.L() > 0 && hv_BigNum.L() > 0)
+		{
+			++unqualNumBig;
+		}
 	}
 	else
 	{
@@ -354,6 +350,7 @@ void CListenerSingle::action()
 		cs = 100;
 	}
 
+	
 	// 显示匹配的中心点
 	int length = 20;
 	line(colorimg,Point(cb- length,rb),Point(cb + length, rb),Scalar(0,0,255),2);
@@ -361,6 +358,7 @@ void CListenerSingle::action()
 	circle(colorimg,Point(cs,rs),10,Scalar(0,255,0),3);	
 }
 
+// 画出齿轮边缘
 void CListenerSingle::xld2vector(Mat &mat, HObject &xld, Scalar color)
 {
 	vector<vector<Point>> contours;
@@ -408,7 +406,7 @@ CListenerMutil ::CListenerMutil ()
 	r = 0;
 	c = 0;
 	m_min = 3;
-	m_max = 10;
+	m_max = 5;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -700,6 +698,24 @@ void CListenerMutil ::action()
 		else
 		{
 			putText(colorimg,"OK",cvPoint(10,50),FONT_HERSHEY_SIMPLEX, 1.0,CV_RGB(0,255,0));
+		}
+
+		// 统计数量
+		if (m_IsBig)
+		{
+			++totalNumBig;
+			if (hv_Num.L()> 0)
+			{
+				++unqualNumBig;
+			}
+		}
+		else
+		{
+			++totalNumSmall;
+			if (hv_Num.L()> 0)
+			{
+				++unqualNumSmall;
+			}
 		}
 	}
 	else
