@@ -20,6 +20,7 @@ int unqualNumBig = 0;
 int totalNumSmall = 0;
 int unqualNumSmall = 0;
 
+CString errorPos = _T("");
 
 // CAboutDlg dialog used for App About
 
@@ -58,6 +59,7 @@ END_MESSAGE_MAP()
 
 CgeartestDlg::CgeartestDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CgeartestDlg::IDD, pParent)
+	, m_errorPos(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_TotalBig = 0;
@@ -106,6 +108,7 @@ void CgeartestDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_TOTAL_SMALL, m_TotalSmall);
 	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_SMALL, m_UnqualSmall);
 	DDX_Text(pDX, IDC_EDIT_UNQUALIFIED_RATE_SMALL,m_UnqualRateSmall);
+	DDX_Text(pDX, IDC_EDIT_ERRORPOS, m_errorPos);
 }
 
 // CgeartestDlg message handlers
@@ -124,6 +127,7 @@ BEGIN_MESSAGE_MAP(CgeartestDlg, CDialog)
 	ON_BN_CLICKED(IDC_RADIO4, &CgeartestDlg::OnBnClickedRadio4)
 	ON_BN_CLICKED(IDC_RADIO1, &CgeartestDlg::OnBnClickedRadio1)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_BUTTON1, &CgeartestDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -243,6 +247,7 @@ void CgeartestDlg::OnBnClickedButtondevice()
 
 void CgeartestDlg::OnBnClickedButtonimagesettings()
 {
+	
 	for(int i = 0; i < m_cameraNumber; ++i)
 	{
 		pProcessThread = pProcessThreadArray[i];
@@ -528,6 +533,22 @@ void CgeartestDlg::OnTimer(UINT_PTR nIDEvent)
 	m_UnqualSmall = unqualNumSmall;
 	m_UnqualRateSmall = (float)unqualNumSmall/totalNumSmall;
 
+	m_errorPos = errorPos;
+	//SetDlgItemText(IDC_STATIC_ERRORPOS,m_errorPos);
 	UpdateData(FALSE);
 	CDialog::OnTimer(nIDEvent);
+}
+
+
+void CgeartestDlg::OnBnClickedButton1()
+{
+	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	totalNumBig = 0;
+	unqualNumBig = 0;
+
+	totalNumSmall = 0;
+	unqualNumSmall = 0;
+
+	errorPos = _T("");
+	OnTimer(1);
 }

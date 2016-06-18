@@ -96,4 +96,7 @@ public:
 
 protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+public:
+	afx_msg void OnBnClickedButton1();
+	CString m_errorPos;
 };

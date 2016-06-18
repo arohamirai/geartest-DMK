@@ -13,6 +13,7 @@ extern int totalNumBig;
 extern int unqualNumBig;
 extern int totalNumSmall;
 extern int unqualNumSmall;
+extern CString errorPos;
 
 
 //CvFont font;
@@ -30,8 +31,8 @@ CListenerSingle::CListenerSingle()
 	cb = 0;
 	rs = 0;
 	cs = 0;
-	m_min = 6;
-	m_max = 8;
+	m_min = 3;
+	m_max = 20;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,7 +73,6 @@ void CListenerSingle::SetViewCWnd(CWnd *pView)
 //////////////////////////////////////////////////////////////////////////
 // Callback handler.
 //////////////////////////////////////////////////////////////////////////
-
 void CListenerSingle::frameReady( Grabber& param, smart_ptr<MemBuffer> pBuffer, DWORD FrameNumber)
 {
 	++totalNumBig;
@@ -247,12 +247,12 @@ void CListenerSingle::action()
 	// src 用于halcon中处理
 	HImage src("byte",640,480,m_inBuf);
 	SmoothImage(src, &ho_ImageSmooth, "gauss", 0.5);
-	EdgesSubPix(ho_ImageSmooth, &ho_Edges, "canny", 1, 20, 40);
-	UnionAdjacentContoursXld(ho_Edges,&ho_UnionEdges,10,1,"attr_keep");
+	EdgesSubPix(ho_ImageSmooth, &ho_Edges, "canny", 1, 15, 30);
+	UnionAdjacentContoursXld(ho_Edges,&ho_UnionEdges,20,1,"attr_keep");
 
 	//////////////////////////////////////////////////////   big
 	FindScaledShapeModel(ho_ImageSmooth, m_modelBig, HTuple(0).TupleRad(), HTuple(60).TupleRad(), 
-		0.85, 1.15, 0.5, 1, 0.5, "least_squares", (HTuple(6).Append(1)), 0.75, &hv_ModelRow, 
+		0.55, 1.55, 0.5, 1, 0.5, "least_squares", (HTuple(6).Append(1)), 0.75, &hv_ModelRow, 
 		&hv_ModelColumn, &hv_ModelAngle, &hv_ModelScale, &hv_ModelScore);
 	//Matching 01: transform the model contours into the detected positions
 	if(hv_ModelScore.Length() != 0 )
@@ -298,7 +298,7 @@ void CListenerSingle::action()
 
 	///////////////////////////////////////////////////////////  small
 	FindScaledShapeModel(ho_ImageSmooth, m_modelSmall, HTuple(0).TupleRad(), HTuple(60).TupleRad(), 
-		0.85, 1.15, 0.5, 1, 0.5, "least_squares", (HTuple(6).Append(1)), 0.75, &hv_ModelRow1, 
+		0.55, 1.55, 0.5, 1, 0.5, "least_squares", (HTuple(6).Append(1)), 0.75, &hv_ModelRow1, 
 		&hv_ModelColumn1, &hv_ModelAngle1, &hv_ModelScale1, &hv_ModelScore1);
 	//Matching 0: transform the model contours into the detected positions
 	if(hv_ModelScore1.Length()!= 0)
@@ -339,10 +339,7 @@ void CListenerSingle::action()
 			putText(colorimg,"Small is OK",cvPoint(10,100),FONT_HERSHEY_SIMPLEX, 1.0,CV_RGB(0,255,0));
 		}
 	
-		if (hv_SmallNum.L() > 0 && hv_BigNum.L() > 0)
-		{
-			++unqualNumBig;
-		}
+	
 	}
 	else
 	{
@@ -350,7 +347,29 @@ void CListenerSingle::action()
 		cs = 100;
 	}
 
-	
+
+	if ((hv_ModelScore.Length()!= 0 && hv_BigNum.L() > 0) || (hv_ModelScore1.Length()!= 0 && hv_SmallNum.L() > 0))
+	{
+		++unqualNumBig;
+		CString str;
+		str.Format(_T("%d- "),totalNumBig);
+		errorPos += str;
+		//*************************调试用
+		//Mat img(480,640,CV_8UC1,m_inBuf);
+		char imgName[20] = {'0'};
+		sprintf(imgName,"unqualify/%d.bmp",totalNumBig);
+		imwrite(imgName,colorimg);
+		//********************************
+	}
+	else
+	{
+		CString str;
+		str.Format(_T("%d- "),0);
+		errorPos += str;
+	}
+
+
+
 	// 显示匹配的中心点
 	int length = 20;
 	line(colorimg,Point(cb- length,rb),Point(cb + length, rb),Scalar(0,0,255),2);
@@ -450,6 +469,11 @@ void CListenerMutil ::SetViewCWnd(CWnd *pView)
 
 void CListenerMutil ::frameReady( Grabber& param, smart_ptr<MemBuffer> pBuffer, DWORD FrameNumber)
 {
+	if (m_IsBig)
+	{
+		++totalNumBig;
+	}
+
 	pBuffer->lock();
 	DoImageProcessing( pBuffer );
 	DrawBuffer(pBuffer);
@@ -707,6 +731,8 @@ void CListenerMutil ::action()
 			if (hv_Num.L()> 0)
 			{
 				++unqualNumBig;
+				
+				
 			}
 		}
 		else

@@ -13,6 +13,8 @@ IMPLEMENT_DYNCREATE(CProcessThread, CWinThread)
 CProcessThread::CProcessThread()
 : m_cameraIndex(0)
 {
+	//两个相机时将下面语句生效
+	//m_cListener.m_IsBig = m_IsBig;
 }
 
 CProcessThread::~CProcessThread()
